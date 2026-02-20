@@ -15,7 +15,7 @@ RUN pip3 install --break-system-packages --no-cache-dir -r /app/scraper/requirem
 
 # ─── Node dependencies ───
 COPY web/package*.json /app/web/
-RUN cd /app/web && npm ci --omit=dev
+RUN cd /app/web && npm ci --omit=dev --legacy-peer-deps
 
 # ─── Copy all source ───
 COPY . /app/
