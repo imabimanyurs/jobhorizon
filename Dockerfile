@@ -36,5 +36,8 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+# ─── Set working directory to web (fixes path resolution for cron API) ───
+WORKDIR /app/web
+
 # ─── Start Next.js ───
-CMD ["npm", "run", "start", "--prefix", "/app/web"]
+CMD ["npm", "run", "start"]

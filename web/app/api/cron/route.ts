@@ -1,57 +1,100 @@
 import { NextRequest, NextResponse } from "next/server";
-import { execSync } from "child_process";
+import { spawn } from "child_process";
 import path from "path";
+import fs from "fs";
 
 const CRON_SECRET = process.env.CRON_SECRET || "";
 
 export async function GET(request: NextRequest) {
     // Authenticate the cron request
     const key = request.nextUrl.searchParams.get("key");
-    if (key !== CRON_SECRET) {
+    if (!CRON_SECRET || key !== CRON_SECRET) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const mode = request.nextUrl.searchParams.get("mode") || "--all";
-    const scraperDir = path.resolve(process.cwd(), "..", "scraper");
+
+    // Resolve scraper directory — works both locally and in Docker
+    // In Docker: cwd is /app/web, so ../scraper = /app/scraper
+    // Locally: cwd is web/, so ../scraper = scraper/
+    let scraperDir = path.resolve(process.cwd(), "..", "scraper");
+
+    // Fallback: check if /app/scraper exists (Docker absolute path)
+    if (!fs.existsSync(scraperDir)) {
+        scraperDir = "/app/scraper";
+    }
+
     const scriptPath = path.join(scraperDir, "daily_run.py");
+
+    // Check if script exists
+    if (!fs.existsSync(scriptPath)) {
+        console.error(`[CRON] Script not found at: ${scriptPath}`);
+        console.error(`[CRON] cwd: ${process.cwd()}, scraperDir: ${scraperDir}`);
+        return NextResponse.json(
+            {
+                status: "error",
+                error: `Script not found at ${scriptPath}`,
+                cwd: process.cwd(),
+                scraperDir,
+            },
+            { status: 500 }
+        );
+    }
 
     try {
         console.log(`[CRON] Starting daily run (mode: ${mode}) at ${new Date().toISOString()}`);
+        console.log(`[CRON] Script path: ${scriptPath}`);
+        console.log(`[CRON] Scraper dir: ${scraperDir}`);
 
-        const output = execSync(`python "${scriptPath}" ${mode}`, {
+        // Spawn async — don't block the HTTP response
+        const child = spawn("python", [scriptPath, mode], {
             cwd: scraperDir,
-            timeout: 10 * 60 * 1000, // 10 minute timeout
-            maxBuffer: 10 * 1024 * 1024, // 10MB output buffer
             env: {
                 ...process.env,
                 PYTHONIOENCODING: "utf-8",
                 PYTHONUNBUFFERED: "1",
             },
-        }).toString();
+            detached: true,
+            stdio: ["ignore", "pipe", "pipe"],
+        });
 
-        console.log(`[CRON] Completed successfully`);
-        console.log(output);
+        // Log output to Railway logs in real-time
+        child.stdout?.on("data", (data: Buffer) => {
+            console.log(`[SCRAPER] ${data.toString().trim()}`);
+        });
 
+        child.stderr?.on("data", (data: Buffer) => {
+            console.error(`[SCRAPER ERROR] ${data.toString().trim()}`);
+        });
+
+        child.on("close", (code: number | null) => {
+            console.log(`[CRON] Scraper process exited with code ${code}`);
+        });
+
+        child.on("error", (err: Error) => {
+            console.error(`[CRON] Failed to start scraper:`, err.message);
+        });
+
+        // Unref so the parent process doesn't wait for the child
+        child.unref();
+
+        // Return immediately — scraper runs in background
         return NextResponse.json({
-            status: "success",
+            status: "started",
+            message: "Scraper started in background. Check Railway logs for progress.",
             timestamp: new Date().toISOString(),
             mode,
-            output: output.slice(-2000), // Last 2000 chars of output
+            scriptPath,
+            pid: child.pid,
         });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Unknown error";
-        const stderr = (error as { stderr?: Buffer })?.stderr?.toString() || "";
-        const stdout = (error as { stdout?: Buffer })?.stdout?.toString() || "";
-
-        console.error(`[CRON] Failed:`, message);
-        console.error(`[CRON] stderr:`, stderr);
-        console.error(`[CRON] stdout:`, stdout);
+        console.error(`[CRON] Failed to spawn:`, message);
 
         return NextResponse.json(
             {
                 status: "error",
                 error: message,
-                output: (stdout + "\n" + stderr).slice(-2000),
                 timestamp: new Date().toISOString(),
             },
             { status: 500 }
