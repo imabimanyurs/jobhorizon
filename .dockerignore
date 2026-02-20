@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+*.log
+data/jobs.db
+data/jobs.db-wal
+data/jobs.db-shm
+data/daily_run.log
+__pycache__
+*.pyc
+.env
+.env.local
+setup_scheduler.ps1
+run_scraper.bat
