@@ -13,15 +13,18 @@ WORKDIR /app
 COPY scraper/requirements.txt /app/scraper/requirements.txt
 RUN pip3 install --break-system-packages --no-cache-dir -r /app/scraper/requirements.txt
 
-# ─── Node dependencies ───
+# ─── Node dependencies (include dev for TypeScript build) ───
 COPY web/package*.json /app/web/
-RUN cd /app/web && npm ci --omit=dev --legacy-peer-deps
+RUN cd /app/web && npm ci --legacy-peer-deps
 
 # ─── Copy all source ───
 COPY . /app/
 
 # ─── Build Next.js ───
 RUN cd /app/web && npm run build
+
+# ─── Prune dev dependencies after build ───
+RUN cd /app/web && npm prune --omit=dev --legacy-peer-deps
 
 # ─── Data directory (Railway Volume mounts here) ───
 RUN mkdir -p /app/data
