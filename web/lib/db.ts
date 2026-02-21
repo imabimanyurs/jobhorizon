@@ -45,7 +45,7 @@ function getDb(): Database.Database {
       initDb.close();
     }
 
-    db = new Database(DB_PATH, { readonly: true });
+    db = new Database(DB_PATH);
     db.pragma("journal_mode = WAL");
   }
   return db;
