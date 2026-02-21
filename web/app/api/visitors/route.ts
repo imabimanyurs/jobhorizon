@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Database from "better-sqlite3";
 import path from "path";
 import crypto from "crypto";
+import fs from "fs";
 
 const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH
     ? path.resolve(process.env.RAILWAY_VOLUME_MOUNT_PATH)
@@ -9,6 +10,7 @@ const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH
 const DB_PATH = path.join(DATA_DIR, "jobs.db");
 
 function getWriteDb() {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
     const db = new Database(DB_PATH);
     db.pragma("journal_mode = WAL");
 

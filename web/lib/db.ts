@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import path from "path";
+import fs from "fs";
 
 // Railway volume or local data dir
 const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH
@@ -11,6 +12,39 @@ let db: Database.Database | null = null;
 
 function getDb(): Database.Database {
   if (!db) {
+    // Ensure data directory exists
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+
+    // If DB doesn't exist yet, create it with the jobs table
+    if (!fs.existsSync(DB_PATH)) {
+      const initDb = new Database(DB_PATH);
+      initDb.exec(`CREATE TABLE IF NOT EXISTS jobs (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        company TEXT NOT NULL,
+        location TEXT DEFAULT '',
+        remote INTEGER DEFAULT 0,
+        apply_url TEXT NOT NULL,
+        source TEXT NOT NULL,
+        posted_date TEXT,
+        match_score INTEGER DEFAULT 0,
+        saved INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL,
+        country TEXT DEFAULT '',
+        state TEXT DEFAULT '',
+        city TEXT DEFAULT '',
+        is_india INTEGER DEFAULT 0,
+        is_faang INTEGER DEFAULT 0,
+        salary_min_lpa REAL,
+        salary_max_lpa REAL,
+        salary_currency TEXT DEFAULT '',
+        source_type TEXT DEFAULT 'ATS',
+        visa_sponsored INTEGER DEFAULT 0,
+        has_equity INTEGER DEFAULT 0
+      )`);
+      initDb.close();
+    }
+
     db = new Database(DB_PATH, { readonly: true });
     db.pragma("journal_mode = WAL");
   }
