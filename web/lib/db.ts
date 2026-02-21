@@ -134,8 +134,15 @@ export function getJobs(params: {
   }
 
   if (params.source) {
-    where += " AND source LIKE ?";
-    queryParams.push(`%${params.source}%`);
+    const sources = params.source.split(",").map(s => s.trim()).filter(Boolean);
+    if (sources.length === 1) {
+      where += " AND source LIKE ?";
+      queryParams.push(`%${sources[0]}%`);
+    } else if (sources.length > 1) {
+      const placeholders = sources.map(() => "source LIKE ?").join(" OR ");
+      where += ` AND (${placeholders})`;
+      sources.forEach(s => queryParams.push(`%${s}%`));
+    }
   }
 
   if (params.country) {
@@ -202,17 +209,25 @@ export function getJobs(params: {
   // Determine sort order
   let orderBy = "ORDER BY created_at DESC, match_score DESC";
   if (params.sort_by === "smart" || params.smart_view) {
-    // Weighted composite: match(50%) + freshness(30%) + salary_signal(20%)
+    // Weighted composite: match(40%) + freshness(25%) + salary_signal(15%) + source_quality(20%)
     orderBy = `ORDER BY (
-      (match_score * 0.5) +
+      (match_score * 0.4) +
       (CASE
         WHEN julianday('now') - julianday(COALESCE(posted_date, created_at)) <= 0 THEN 100
         WHEN julianday('now') - julianday(COALESCE(posted_date, created_at)) <= 1 THEN 80
         WHEN julianday('now') - julianday(COALESCE(posted_date, created_at)) <= 3 THEN 50
         WHEN julianday('now') - julianday(COALESCE(posted_date, created_at)) <= 7 THEN 20
         ELSE 5
-      END * 0.3) +
-      (CASE WHEN COALESCE(salary_min_lpa, 0) > 0 THEN MIN(COALESCE(salary_min_lpa, 0), 100) ELSE 0 END * 0.2)
+      END * 0.25) +
+      (CASE WHEN COALESCE(salary_min_lpa, 0) > 0 THEN MIN(COALESCE(salary_min_lpa, 0), 100) ELSE 0 END * 0.15) +
+      (CASE
+        WHEN source LIKE '%jsearch%' THEN 100
+        WHEN source LIKE '%greenhouse%' THEN 95
+        WHEN source LIKE '%lever%' THEN 90
+        WHEN source LIKE '%serp%' THEN 40
+        WHEN source LIKE '%adzuna%' THEN 30
+        ELSE 50
+      END * 0.2)
     ) DESC`;
   } else if (params.sort_by === "score") {
     orderBy = "ORDER BY match_score DESC, created_at DESC";

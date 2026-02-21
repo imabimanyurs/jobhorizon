@@ -15,6 +15,7 @@ import {
   VStack,
   IconButton,
   Select,
+  Checkbox,
   Switch,
   FormControl,
   FormLabel,
@@ -176,7 +177,7 @@ function Dashboard() {
   const [indiaOnly, setIndiaOnly] = useState(false);
   const [faangOnly, setFaangOnly] = useState(false);
   const [minScore, setMinScore] = useState(0);
-  const [source, setSource] = useState("");
+  const [sources, setSources] = useState<string[]>(["jsearch"]);
   const [country, setCountry] = useState("");
   const [minSalary, setMinSalary] = useState(0);
   const [minSalaryPreview, setMinSalaryPreview] = useState(0);
@@ -221,7 +222,10 @@ function Dashboard() {
         if (p.remoteOnly) setRemoteOnly(true);
         if (p.indiaOnly) setIndiaOnly(true);
         if (p.minScore) setMinScore(p.minScore);
-        if (p.source) setSource(p.source);
+        if (p.source) {
+          if (Array.isArray(p.source)) setSources(p.source);
+          else if (typeof p.source === 'string' && p.source) setSources(p.source.split(','));
+        }
         if (p.country) setCountry(p.country);
         if (p.minSalary) setMinSalary(p.minSalary);
         if (p.keyword) { setKeyword(p.keyword); setSearchInput(p.keyword); }
@@ -237,7 +241,7 @@ function Dashboard() {
     if (sp.get("india") === "true") setIndiaOnly(true);
     if (sp.get("faang") === "true") setFaangOnly(true);
     if (sp.get("country")) setCountry(sp.get("country")!);
-    if (sp.get("source")) setSource(sp.get("source")!);
+    if (sp.get("source")) setSources(sp.get("source")!.split(","));
     if (sp.get("visa") === "true") setVisaOnly(true);
     if (sp.get("equity") === "true") setEquityOnly(true);
     if (sp.get("min_score")) setMinScore(parseInt(sp.get("min_score")!) || 0);
@@ -277,7 +281,7 @@ function Dashboard() {
       if (maxDaysAgo > 0) params.set("max_days_ago", maxDaysAgo.toString());
       if (smartView) params.set("smart_view", "true");
       if (keyword) params.set("keyword", keyword);
-      if (source) params.set("source", source);
+      if (sources.length > 0) params.set("source", sources.join(","));
       if (country) params.set("country", country);
       if (minSalary > 0) params.set("min_salary", minSalary.toString());
       if (maxSalary > 0) params.set("max_salary", maxSalary.toString());
@@ -307,7 +311,7 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [page, keyword, remoteOnly, indiaOnly, faangOnly, todayOnly, maxDaysAgo, minScore, source, country, savedFilter, savedIds, minSalary, maxSalary, sortBy, companySearch, smartView, visaOnly, equityOnly, toast]);
+  }, [page, keyword, remoteOnly, indiaOnly, faangOnly, todayOnly, maxDaysAgo, minScore, sources, country, savedFilter, savedIds, minSalary, maxSalary, sortBy, companySearch, smartView, visaOnly, equityOnly, toast]);
 
   // Sync filters to URL (#12)
   useEffect(() => {
@@ -317,7 +321,7 @@ function Dashboard() {
     if (indiaOnly) params.set("india", "true");
     if (faangOnly) params.set("faang", "true");
     if (country) params.set("country", country);
-    if (source) params.set("source", source);
+    if (sources.length > 0) params.set("source", sources.join(","));
     if (visaOnly) params.set("visa", "true");
     if (equityOnly) params.set("equity", "true");
     if (minScore > 0) params.set("min_score", minScore.toString());
@@ -325,7 +329,7 @@ function Dashboard() {
     const qs = params.toString();
     const newUrl = qs ? `/?${qs}` : "/";
     window.history.replaceState(null, "", newUrl);
-  }, [keyword, remoteOnly, indiaOnly, faangOnly, country, source, visaOnly, equityOnly, minScore, companySearch]);
+  }, [keyword, remoteOnly, indiaOnly, faangOnly, country, sources, visaOnly, equityOnly, minScore, companySearch]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -395,22 +399,22 @@ function Dashboard() {
 
   const clearFilters = () => {
     setKeyword(""); setSearchInput(""); setRemoteOnly(false); setIndiaOnly(false);
-    setFaangOnly(false); setTodayOnly(false); setMaxDaysAgo(0); setMaxDaysPreview(0); setMinScore(0); setSource(""); setCountry(""); setMinSalary(0); setMinSalaryPreview(0); setMaxSalary(0); setMaxSalaryPreview(0);
+    setFaangOnly(false); setTodayOnly(false); setMaxDaysAgo(0); setMaxDaysPreview(0); setMinScore(0); setSources([]); setCountry(""); setMinSalary(0); setMinSalaryPreview(0); setMaxSalary(0); setMaxSalaryPreview(0);
     setSavedFilter(false); setSortBy(""); setCompanySearch(""); setCompanyInput(""); setSmartView(false); setVisaOnly(false); setEquityOnly(false); setPage(1);
   };
 
   const savePreset = () => {
-    const preset = { remoteOnly, indiaOnly, faangOnly, minScore, source, country, minSalary, keyword };
+    const preset = { remoteOnly, indiaOnly, faangOnly, minScore, source: sources.join(","), country, minSalary, keyword };
     localStorage.setItem("filterPreset", JSON.stringify(preset));
     toast({ title: "Filter preset saved!", description: "Will auto-apply on next visit.", status: "success", duration: 2000, position: "top-right" });
   };
 
   const totalPages = useMemo(() => Math.ceil(total / perPage), [total, perPage]);
   const hasFilters = useMemo(() =>
-    keyword || remoteOnly || indiaOnly || faangOnly || minScore > 0 || source || country ||
+    keyword || remoteOnly || indiaOnly || faangOnly || minScore > 0 || sources.length > 0 || country ||
     minSalary > 0 || maxSalary > 0 || savedFilter || todayOnly || maxDaysAgo > 0 || sortBy || companySearch ||
     visaOnly || equityOnly,
-    [keyword, remoteOnly, indiaOnly, faangOnly, minScore, source, country, minSalary, maxSalary, savedFilter, todayOnly, maxDaysAgo, sortBy, companySearch, visaOnly, equityOnly]
+    [keyword, remoteOnly, indiaOnly, faangOnly, minScore, sources, country, minSalary, maxSalary, savedFilter, todayOnly, maxDaysAgo, sortBy, companySearch, visaOnly, equityOnly]
   );
 
   // Dynamic filtered stats (#13)
@@ -452,13 +456,26 @@ function Dashboard() {
           </FormControl>
         ))}
       </VStack>
-      <Select size="sm" bg={t.inputBg} border="1px solid" borderColor={t.inputBorder} borderRadius="10px" value={source}
-        onChange={(e) => { setSource(e.target.value); setPage(1); }} _focus={{ borderColor: t.inputFocusBorder }} color={t.textPrimary}>
-        <option value="" style={{ background: isDark ? "#0a0a0f" : "#ffffff" }}>All Sources</option>
-        {stats && Object.entries(stats.by_source).map(([s]) => (
-          <option key={s} value={s} style={{ background: isDark ? "#0a0a0f" : "#ffffff" }}>{s}</option>
-        ))}
-      </Select>
+      {/* Source Checkboxes */}
+      <Box>
+        <Text fontSize="xs" color={t.textMuted} mb={1.5} fontWeight={600}>Source</Text>
+        <VStack align="stretch" spacing={1}>
+          {["jsearch", "greenhouse", "lever", "adzuna", "serp"].map(src => (
+            <Checkbox
+              key={src} size="sm" colorScheme="purple"
+              isChecked={sources.includes(src)}
+              onChange={(e) => {
+                const next = e.target.checked ? [...sources, src] : sources.filter(s => s !== src);
+                setSources(next); setPage(1);
+              }}
+              spacing={2}
+              sx={{ '& .chakra-checkbox__control': { borderColor: t.inputBorder, bg: t.inputBg }, '& .chakra-checkbox__control[data-checked]': { bg: '#6366f1', borderColor: '#6366f1' } }}
+            >
+              <Text fontSize="xs" color={t.textSecondary} textTransform="capitalize">{src === 'serp' ? 'SerpAPI' : src === 'jsearch' ? 'JSearch ⭐' : src.charAt(0).toUpperCase() + src.slice(1)}</Text>
+            </Checkbox>
+          ))}
+        </VStack>
+      </Box>
       <Select size="sm" bg={t.inputBg} border="1px solid" borderColor={t.inputBorder} borderRadius="10px" value={country}
         onChange={(e) => { setCountry(e.target.value); setPage(1); }} _focus={{ borderColor: t.inputFocusBorder }} color={t.textPrimary}>
         <option value="" style={{ background: isDark ? "#0a0a0f" : "#ffffff" }}>All Countries</option>
@@ -857,21 +874,25 @@ function Dashboard() {
               </FormControl>
             </VStack>
 
-            {/* Source Filter */}
+            {/* Source Filter - Checkboxes */}
             <Box>
               <Text fontSize="xs" color={t.textMuted} mb={1.5} fontWeight={600}>Source</Text>
-              <Select
-                size="sm" value={source} onChange={(e) => { setSource(e.target.value); setPage(1); }}
-                bg={t.inputBg} border="1px solid" borderColor={t.inputBorder} borderRadius="10px" _focus={{ borderColor: t.inputFocusBorder }} color={t.textPrimary}
-                sx={{ '& option': { bg: t.optionBg, color: t.textPrimary } }}
-              >
-                <option value="">All Sources</option>
-                <option value="greenhouse">Greenhouse</option>
-                <option value="lever">Lever</option>
-                <option value="adzuna">Adzuna</option>
-                <option value="jsearch">JSearch</option>
-                <option value="serp">SerpAPI</option>
-              </Select>
+              <VStack align="stretch" spacing={1.5}>
+                {["jsearch", "greenhouse", "lever", "adzuna", "serp"].map(src => (
+                  <Checkbox
+                    key={src} size="sm" colorScheme="purple"
+                    isChecked={sources.includes(src)}
+                    onChange={(e) => {
+                      const next = e.target.checked ? [...sources, src] : sources.filter(s => s !== src);
+                      setSources(next); setPage(1);
+                    }}
+                    spacing={2}
+                    sx={{ '& .chakra-checkbox__control': { borderColor: t.inputBorder, bg: t.inputBg }, '& .chakra-checkbox__control[data-checked]': { bg: '#6366f1', borderColor: '#6366f1' } }}
+                  >
+                    <Text fontSize="xs" color={t.textSecondary} textTransform="capitalize">{src === 'serp' ? 'SerpAPI' : src === 'jsearch' ? 'JSearch ⭐' : src.charAt(0).toUpperCase() + src.slice(1)}</Text>
+                  </Checkbox>
+                ))}
+              </VStack>
             </Box>
 
             {/* Country Filter */}
@@ -932,7 +953,9 @@ function Dashboard() {
                   {todayOnly && <FilterTag label="Today" onRemove={() => { setTodayOnly(false); setPage(1); }} />}
                   {maxDaysAgo > 0 && <FilterTag label={`≤${maxDaysAgo}d`} onRemove={() => { setMaxDaysAgo(0); setPage(1); }} />}
                   {minScore > 0 && <FilterTag label={`Score ${minScore}+`} onRemove={() => { setMinScore(0); setPage(1); }} />}
-                  {source && <FilterTag label={source} onRemove={() => { setSource(""); setPage(1); }} />}
+                  {sources.length > 0 && sources.map(src => (
+                    <FilterTag key={src} label={src} onRemove={() => { setSources(sources.filter(s => s !== src)); setPage(1); }} />
+                  ))}
                   {country && <FilterTag label={country} onRemove={() => { setCountry(""); setPage(1); }} />}
                   {minSalary > 0 && <FilterTag label={`${minSalary}+ LPA`} onRemove={() => { setMinSalary(0); setPage(1); }} />}
                   {sortBy && <FilterTag label={`Sort: ${sortBy}`} onRemove={() => { setSortBy(""); setPage(1); }} />}
@@ -960,8 +983,11 @@ function Dashboard() {
                               key={src} justify="space-between" align="center" fontSize="sm"
                               cursor="pointer" px={1.5} py={0.5} borderRadius="6px" transition="all 0.1s"
                               _hover={{ bg: t.sourceRowHover }}
-                              onClick={() => { setSource(source === src ? "" : src); setPage(1); }}
-                              bg={source === src ? t.sourceRowActive : "transparent"}
+                              onClick={() => {
+                                const next = sources.includes(src) ? sources.filter(s => s !== src) : [...sources, src];
+                                setSources(next); setPage(1);
+                              }}
+                              bg={sources.includes(src) ? t.sourceRowActive : "transparent"}
                             >
                               <HStack spacing={2}>
                                 <Box w="8px" h="8px" borderRadius="full" bg={getSourceBadge(src)} />
