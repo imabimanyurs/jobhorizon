@@ -87,6 +87,7 @@ export interface StatsResponse {
   total: number;
   today: number;
   by_source: Record<string, number>;
+  by_company: Record<string, number>;
   india: number;
   remote: number;
   faang: number;
@@ -264,10 +265,27 @@ export function getStats(): StatsResponse {
     withSalary = (db.prepare("SELECT COUNT(*) as cnt FROM jobs WHERE salary_min_lpa IS NOT NULL AND salary_min_lpa > 0").get() as { cnt: number }).cnt;
   } catch { }
 
+  // Companies – exclude junk names starting with http/https or digits
+  let companies: { company: string; cnt: number }[] = [];
+  try {
+    companies = db
+      .prepare(
+        `SELECT company, COUNT(*) as cnt FROM jobs
+         WHERE company != ''
+           AND company NOT LIKE 'http%'
+           AND company NOT GLOB '[0-9]*'
+         GROUP BY company
+         ORDER BY cnt DESC
+         LIMIT 100`
+      )
+      .all() as { company: string; cnt: number }[];
+  } catch { }
+
   return {
     total,
     today: todayCount,
     by_source: Object.fromEntries(sources.map((s) => [s.source, s.cnt])),
+    by_company: Object.fromEntries(companies.map((c) => [c.company, c.cnt])),
     india,
     remote,
     faang,

@@ -29,6 +29,7 @@ export interface Stats {
     total: number;
     today: number;
     by_source: Record<string, number>;
+    by_company: Record<string, number>;
     india: number;
     remote: number;
     faang: number;

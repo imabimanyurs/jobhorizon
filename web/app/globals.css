@@ -1,18 +1,10 @@
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-card: #16162a;
-  --bg-card-hover: #1c1c36;
-  --border: #2a2a4a;
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --page-bg: #f4f6fa;
+  --scroll-thumb: #c7d2fe;
+  --scroll-track: #f1f5f9;
+  --text-primary: #1e293b;
   --accent: #6366f1;
   --accent-glow: rgba(99, 102, 241, 0.15);
-  --green: #22c55e;
-  --green-glow: rgba(34, 197, 94, 0.15);
-  --orange: #f97316;
-  --red: #ef4444;
 }
 
 * {
@@ -23,7 +15,7 @@
 
 html,
 body {
-  background: var(--bg-primary);
+  background: var(--page-bg);
   color: var(--text-primary);
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -31,6 +23,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   max-width: 100vw;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 ::selection {
@@ -41,12 +35,16 @@ body {
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: var(--scroll-track);
+  transition: background 0.4s ease;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #4a4a6a;
+  background: var(--scroll-thumb);
   border-radius: 3px;
+  transition: background 0.4s ease;
 }
 
 @keyframes fadeInUp {
@@ -54,6 +52,7 @@ body {
     opacity: 0;
     transform: translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -64,17 +63,35 @@ body {
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
 
 @keyframes pulse-glow {
+
   0%,
   100% {
     box-shadow: 0 0 0 0 var(--accent-glow);
   }
+
   50% {
     box-shadow: 0 0 20px 5px var(--accent-glow);
   }
+}
+
+/* Smooth transition for theme-aware elements */
+.theme-transition,
+.theme-transition * {
+  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Fix dropdown option backgrounds for both themes */
+select option {
+  background: var(--page-bg);
+  color: var(--text-primary);
 }

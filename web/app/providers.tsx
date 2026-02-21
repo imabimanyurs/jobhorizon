@@ -1,6 +1,7 @@
 "use client";
 
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { ThemeModeProvider } from "./components/ThemeContext";
 
 const theme = extendTheme({
     config: {
@@ -10,17 +11,18 @@ const theme = extendTheme({
     styles: {
         global: {
             "html, body": {
-                bg: "#0a0a0f",
-                color: "#e2e8f0",
+                bg: "var(--page-bg, #0a0a0f)",
+                color: "var(--text-primary, #e2e8f0)",
+                transition: "background-color 0.4s ease, color 0.4s ease",
             },
             "::-webkit-scrollbar": {
                 width: "6px",
             },
             "::-webkit-scrollbar-track": {
-                bg: "#1a1a2e",
+                bg: "var(--scroll-track, #1a1a2e)",
             },
             "::-webkit-scrollbar-thumb": {
-                bg: "#4a4a6a",
+                bg: "var(--scroll-thumb, #4a4a6a)",
                 borderRadius: "3px",
             },
         },
@@ -53,5 +55,11 @@ const theme = extendTheme({
 });
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-    return <ChakraProvider theme={theme}>{children}</ChakraProvider>;
+    return (
+        <ChakraProvider theme={theme}>
+            <ThemeModeProvider>
+                {children}
+            </ThemeModeProvider>
+        </ChakraProvider>
+    );
 }
