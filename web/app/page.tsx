@@ -278,8 +278,9 @@ function Dashboard() {
   const fetchStats = useCallback(async () => {
     try {
       const res = await fetch("/api/jobs?action=stats");
+      if (!res.ok) return;
       const data = await res.json();
-      setStats(data);
+      if (data && data.total !== undefined && !data.error) setStats(data);
     } catch { }
   }, []);
 
