@@ -55,6 +55,7 @@ export interface ThemeTokens {
     statPillBorder: string;
     statPillHoverBg: string;
     statPillHoverBorder: string;
+    statPillLabelColor: string;
 
     // Smart-view bar
     smartBarBg: string;
@@ -202,6 +203,7 @@ const DARK: ThemeTokens = {
     statPillBorder: "#1e1e3a",
     statPillHoverBg: "rgba(30,30,58,0.5)",
     statPillHoverBorder: "rgba(99,102,241,0.3)",
+    statPillLabelColor: "#64748b",
 
     smartBarBg: "rgba(18, 18, 26, 0.95)",
 
@@ -326,6 +328,7 @@ const LIGHT: ThemeTokens = {
     statPillBorder: "#e2e8f0",
     statPillHoverBg: "#eef2ff",
     statPillHoverBorder: "rgba(99,102,241,0.3)",
+    statPillLabelColor: "#475569",
 
     smartBarBg: "rgba(255, 255, 255, 0.98)",
 

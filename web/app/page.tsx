@@ -433,7 +433,9 @@ function Dashboard() {
         <Input placeholder="Search jobs..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { handleSearch(); } }}
           bg={t.inputBg} border="1px solid" borderColor={t.inputBorder} borderRadius="10px"
-          _focus={{ borderColor: t.inputFocusBorder, boxShadow: `0 0 0 1px ${t.inputFocusBorder}` }} _placeholder={{ color: t.inputPlaceholder }} />
+          _focus={{ borderColor: t.inputFocusBorder, boxShadow: `0 0 0 1px ${t.inputFocusBorder}` }} _placeholder={{ color: t.inputPlaceholder }}
+          data-mobile-search
+        />
       </InputGroup>
       <VStack spacing={2} align="stretch">
         {([
@@ -737,6 +739,15 @@ function Dashboard() {
       <Flex display={{ base: "flex", lg: "none" }} px={3} pt={2} pb={1} gap={1.5}>
         {/* Mobile Theme Toggle */}
         <ThemeToggle size="sm" />
+        {/* Mobile Search */}
+        <IconButton
+          aria-label="Search" size="xs" variant="unstyled" display="flex" alignItems="center" justifyContent="center"
+          bg={t.mobileToolbarBg} border="1px solid" borderColor={t.mobileToolbarBorder} color={t.textSecondary}
+          borderRadius="8px" w="32px" h="32px" minW="32px"
+          _hover={{ bg: t.sourceRowHover, color: t.textPrimary }}
+          onClick={() => { filterDrawer.onOpen(); setTimeout(() => { const el = document.querySelector<HTMLInputElement>('[data-mobile-search]'); el?.focus(); }, 300); }}
+          icon={<SearchIcon />}
+        />
         <Button flex={1} size="xs" leftIcon={<Text fontSize="xs">⚙️</Text>}
           bg={t.mobileToolbarBg} border="1px solid" borderColor={t.mobileToolbarBorder} color={t.textSecondary} borderRadius="8px"
           _hover={{ bg: t.sourceRowHover }} onClick={filterDrawer.onOpen} fontSize="10px" fontWeight={600} h="32px"
@@ -1385,7 +1396,7 @@ function StatPill({ label, value, color, icon }: { label: string; value: string;
       transition="all 0.2s ease"
       _hover={{ borderColor: t.statPillHoverBorder, bg: t.statPillHoverBg }}
     >
-      <Text fontSize="9px" color={t.textMuted} textTransform="uppercase" letterSpacing="0.06em">
+      <Text fontSize="9px" color={t.statPillLabelColor} textTransform="uppercase" letterSpacing="0.06em" fontWeight={600}>
         {icon && <>{icon} </>}{label}
       </Text>
       <Text fontSize="sm" fontWeight={700} color={color}>{value}</Text>
@@ -1526,7 +1537,7 @@ const JobCard = memo(function JobCard({ job, isSaved, onToggleSave, rates, showT
           <Link href={job.apply_url} isExternal _hover={{ textDecoration: "none" }}>
             <Button
               size={{ base: "xs", md: "sm" }} bg="linear-gradient(135deg, #6366f1, #8b5cf6)" color="white"
-              borderRadius={{ base: "8px", md: "10px" }} fontSize={{ base: "10px", md: "xs" }} fontWeight={600}
+              borderRadius={{ base: "8px", md: "10px" }} fontSize={{ base: "10px", md: "xs" }} fontWeight={700}
               _hover={{ bg: "linear-gradient(135deg, #7c7ff7, #a78bfa)", transform: "scale(1.05)" }}
               transition="all 0.15s ease" rightIcon={<ExternalLinkIcon />}
               px={{ base: 2, md: 3 }}
