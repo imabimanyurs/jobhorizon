@@ -558,14 +558,48 @@ function Dashboard() {
 
           {/* ─── Right: Visitors + Saved ─── */}
           <HStack spacing={2} flexShrink={0}>
-            {/* Visitors pill with Buy Me a Coffee popover */}
-            <Popover trigger="click" placement="bottom-end" openDelay={0} closeDelay={300}>
+            {/* Desktop: Visitors pill with Buy Me a Coffee popover on HOVER */}
+            <Popover trigger="hover" placement="bottom-end" openDelay={200} closeDelay={400}>
               <PopoverTrigger>
                 <Box cursor="pointer" display={{ base: "none", md: "block" }}>
                   <StatPill label="Visitors" value={visitorCount > 0 ? visitorCount.toLocaleString() : "—"} color="#ec4899" icon="👥" />
                 </Box>
               </PopoverTrigger>
-              {/* Compact mobile visitors button */}
+              <PopoverContent
+                bg="#12121f" border="1px solid #2a2a4a" borderRadius="14px"
+                w="240px" boxShadow="0 8px 32px rgba(0,0,0,0.5)" _focus={{ outline: "none" }}
+              >
+                <PopoverArrow bg="#12121f" borderColor="#2a2a4a" />
+                <PopoverBody p={4}>
+                  <Box textAlign="center">
+                    <Text fontWeight={700} fontSize="sm" mb={1.5} color="#e2e8f0">Thanks for visiting! 🎉</Text>
+                    <Text fontSize="xs" color="#94a3b8" mb={3} lineHeight="1.5">
+                      JobHorizon is free &amp; open source.<br />If it helped you, consider supporting:
+                    </Text>
+                    <Link
+                      href="https://www.buymeacoffee.com/rsabimanyu"
+                      isExternal
+                      _hover={{ textDecoration: "none" }}
+                    >
+                      <Flex
+                        align="center" justify="center" gap={1.5}
+                        bg="linear-gradient(135deg, #ffdd00, #f7a800)"
+                        color="#1a1a2e" borderRadius="10px"
+                        px={4} py={2} fontWeight={700} fontSize="xs"
+                        transition="all 0.2s"
+                        _hover={{ transform: "scale(1.05)", boxShadow: "0 0 16px rgba(255,221,0,0.5)" }}
+                      >
+                        <Text fontSize="md">☕</Text>
+                        <Text>Buy Me a Coffee</Text>
+                      </Flex>
+                    </Link>
+                  </Box>
+                </PopoverBody>
+              </PopoverContent>
+            </Popover>
+
+            {/* Mobile: Visitors button with Buy Me a Coffee popover on CLICK */}
+            <Popover trigger="click" placement="bottom-end" openDelay={0} closeDelay={300}>
               <PopoverTrigger>
                 <Button display={{ base: "flex", md: "none" }} size="xs" variant="unstyled" alignItems="center"
                   bg="rgba(18,18,26,0.9)" border="1px solid #2a2a4a" borderRadius="8px" px={2} py={1} h="auto"
@@ -615,7 +649,7 @@ function Dashboard() {
               borderRadius={{ base: "8px", md: "12px" }}
               border="1px solid"
               borderColor={savedFilter ? "#8b5cf6" : "#2a2a4a"}
-              px={{ base: 2, md: 4 }} py={{ base: 1, md: 3 }} h="auto"
+              px={{ base: 2, md: 4 }} py={{ base: 1, md: 2.5 }} h={{ base: "auto", md: "42px" }}
               fontSize={{ base: "10px", md: "sm" }} fontWeight={700}
               letterSpacing="0.02em"
               boxShadow={savedFilter ? "0 0 20px rgba(99,102,241,0.4)" : "none"}
