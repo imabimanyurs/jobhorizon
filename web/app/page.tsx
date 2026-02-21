@@ -46,9 +46,9 @@ import {
   DrawerHeader,
   DrawerBody,
   useDisclosure,
+  Portal,
 } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Job, Stats, AppStatus, APP_STATUSES } from "@/lib/types";
 import { TITLE_MAX_CHARS, LOCATION_MAX_CHARS, PER_PAGE, TOOLTIP_DELAY, COLORS, BADGE_STYLES } from "@/lib/constants";
@@ -100,8 +100,58 @@ const RefreshIcon = () => (
 export default function DashboardPage() {
   return (
     <Suspense fallback={
-      <Box h="100vh" bg="#0a0a0f" display="flex" alignItems="center" justifyContent="center">
-        <Text color="#64748b">Loading...</Text>
+      <Box h="100vh" bg="#0a0a0f" display="flex" flexDirection="column" overflow="hidden">
+        {/* Skeleton Top Bar */}
+        <Box bg="rgba(10,10,15,0.95)" borderBottom="1px solid #1e1e3a" px={{ base: 3, md: 6 }} py={3}>
+          <Flex maxW="1600px" mx="auto" justify="space-between" align="center">
+            <HStack spacing={3}>
+              <Box w="40px" h="40px" borderRadius="12px" bg="#1e1e3a" />
+              <Box>
+                <Box w="120px" h="16px" borderRadius="4px" bg="#1e1e3a" mb={1} />
+                <Box w="160px" h="10px" borderRadius="3px" bg="#14141f" />
+              </Box>
+            </HStack>
+            <HStack spacing={2} display={{ base: "none", md: "flex" }}>
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <Box key={i} w="70px" h="40px" borderRadius="10px" bg="#12121a" border="1px solid #1e1e3a" />
+              ))}
+            </HStack>
+          </Flex>
+        </Box>
+        {/* Skeleton Main Layout */}
+        <Flex maxW="1600px" mx="auto" px={{ base: 2, md: 4 }} py={4} gap={5} flex={1}>
+          {/* Skeleton Sidebar */}
+          <Box w="260px" display={{ base: "none", lg: "block" }} flexShrink={0}>
+            <VStack spacing={4} bg="#12121a" border="1px solid #1e1e3a" borderRadius="16px" p={5} align="stretch">
+              <Box w="60px" h="12px" borderRadius="4px" bg="#1e1e3a" />
+              <Box w="100%" h="32px" borderRadius="10px" bg="#0a0a0f" border="1px solid #1e1e3a" />
+              {[1, 2, 3, 4].map(i => (
+                <Flex key={i} justify="space-between" align="center">
+                  <Box w="90px" h="14px" borderRadius="4px" bg="#1e1e3a" />
+                  <Box w="36px" h="20px" borderRadius="10px" bg="#1e1e3a" />
+                </Flex>
+              ))}
+            </VStack>
+          </Box>
+          {/* Skeleton Job List */}
+          <Box flex={1}>
+            <Box w="100%" h="50px" borderRadius="12px" bg="#12121a" border="1px solid #1e1e3a" mb={4} />
+            <VStack spacing={3} align="stretch">
+              {[1, 2, 3, 4, 5].map(i => (
+                <JobCardSkeleton key={i} />
+              ))}
+            </VStack>
+          </Box>
+          {/* Skeleton Right Sidebar */}
+          <Box w="270px" display={{ base: "none", lg: "block" }} flexShrink={0}>
+            <VStack spacing={4} bg="#12121a" border="1px solid #1e1e3a" borderRadius="16px" p={5} align="stretch">
+              <Box w="80px" h="12px" borderRadius="4px" bg="#1e1e3a" />
+              {[1, 2, 3].map(i => (
+                <Box key={i} w="100%" h="60px" borderRadius="8px" bg="#0a0a0f" border="1px solid #1e1e3a" />
+              ))}
+            </VStack>
+          </Box>
+        </Flex>
       </Box>
     }>
       <Dashboard />
@@ -148,7 +198,6 @@ function Dashboard() {
   const advancedDrawer = useDisclosure();
   const perPage = PER_PAGE;
   const toast = useToast();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Derive savedIds from jobStatuses (not from stale "savedJobs" key)
@@ -178,7 +227,7 @@ function Dashboard() {
 
   // Hydrate filters from URL params on mount (#12)
   useEffect(() => {
-    const sp = searchParams;
+    const sp = new URLSearchParams(window.location.search);
     if (sp.get("keyword")) { setKeyword(sp.get("keyword")!); setSearchInput(sp.get("keyword")!); }
     if (sp.get("remote") === "true") setRemoteOnly(true);
     if (sp.get("india") === "true") setIndiaOnly(true);
@@ -189,7 +238,6 @@ function Dashboard() {
     if (sp.get("equity") === "true") setEquityOnly(true);
     if (sp.get("min_score")) setMinScore(parseInt(sp.get("min_score")!) || 0);
     if (sp.get("company")) { setCompanySearch(sp.get("company")!); setCompanyInput(sp.get("company")!); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load application statuses from localStorage
@@ -1330,7 +1378,7 @@ const JobCard = memo(function JobCard({ job, isSaved, onToggleSave, rates, showT
         </Box>
 
         {/* Actions */}
-        <HStack spacing={2} flexShrink={0} pt={0.5}>
+        <HStack spacing={{ base: 1.5, md: 2 }} flexShrink={0} align="center">
           <Tooltip label={isSaved ? "Unsave" : "Save"} placement="top">
             <IconButton
               aria-label="Save job" variant="ghost" size="sm"
@@ -1342,29 +1390,44 @@ const JobCard = memo(function JobCard({ job, isSaved, onToggleSave, rates, showT
           </Tooltip>
 
           {showTracker && (
-            <Menu strategy="fixed">
+            <Menu strategy="fixed" isLazy>
               <MenuButton
-                as={Button} size="sm" variant="ghost" borderRadius="8px"
-                border="1px solid" borderColor={status ? currentStatus.color + "44" : "#2a2a4a"}
-                bg={status ? currentStatus.color + "15" : "transparent"}
-                color={currentStatus.color} fontSize="xs" fontWeight={600} px={2.5}
-                _hover={{ bg: currentStatus.color + "22", borderColor: currentStatus.color }}
+                as={Button} size={{ base: "xs", md: "sm" }} variant="ghost" borderRadius="8px"
+                border="1px solid" borderColor={status ? currentStatus.color + "55" : "#3a3a5a"}
+                bg={status ? currentStatus.color + "18" : "rgba(30,30,58,0.6)"}
+                color={currentStatus.color} fontSize={{ base: "10px", md: "xs" }} fontWeight={600}
+                px={{ base: 2, md: 3 }} h={{ base: "28px", md: "32px" }}
+                _hover={{ bg: currentStatus.color + "28", borderColor: currentStatus.color, transform: "translateY(-1px)" }}
+                _active={{ bg: currentStatus.color + "30" }}
                 transition="all 0.15s ease"
+                cursor="pointer"
+                rightIcon={
+                  <Box as="span" display="inline-flex" alignItems="center" ml={0.5}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </Box>
+                }
               >
-                {currentStatus.icon} {currentStatus.label}
+                <HStack spacing={1} as="span">
+                  <Text as="span" fontSize={{ base: "11px", md: "13px" }}>{currentStatus.icon}</Text>
+                  <Text as="span">{currentStatus.label}</Text>
+                </HStack>
               </MenuButton>
-              <MenuList bg="#1a1a2e" borderColor="#2a2a4a" minW="160px" py={1} zIndex={1400}>
-                {APP_STATUSES.filter(s => s.value !== "").map((s) => (
-                  <MenuItem
-                    key={s.value} onClick={() => onStatusChange(s.value)}
-                    bg={status === s.value ? s.color + "15" : "transparent"}
-                    _hover={{ bg: s.color + "22" }} color={s.color}
-                    fontSize="xs" fontWeight={500} py={1.5}
-                  >
-                    <Text mr={2}>{s.icon}</Text> {s.label}
-                  </MenuItem>
-                ))}
-              </MenuList>
+              <Portal>
+                <MenuList bg="#1a1a2e" borderColor="#2a2a4a" minW="160px" py={1} zIndex={1400} boxShadow="0 8px 30px rgba(0,0,0,0.5)">
+                  {APP_STATUSES.filter(s => s.value !== "").map((s) => (
+                    <MenuItem
+                      key={s.value} onClick={() => onStatusChange(s.value)}
+                      bg={status === s.value ? s.color + "15" : "transparent"}
+                      _hover={{ bg: s.color + "22" }} color={s.color}
+                      fontSize="xs" fontWeight={500} py={1.5}
+                    >
+                      <Text mr={2}>{s.icon}</Text> {s.label}
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </Portal>
             </Menu>
           )}
 

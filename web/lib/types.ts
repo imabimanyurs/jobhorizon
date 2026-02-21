@@ -39,7 +39,7 @@ export type AppStatus = "" | "saved" | "applied" | "interviewing" | "rejected" |
 
 export const APP_STATUSES: { value: AppStatus; label: string; icon: string; color: string }[] = [
     { value: "", label: "Not tracked", icon: "\u25CB", color: "#4a4a6a" },
-    { value: "saved", label: "Saved", icon: "\u2606", color: "#6366f1" },
+    { value: "saved", label: "Saved", icon: "🔖", color: "#6366f1" },
     { value: "applied", label: "Applied", icon: "\u2192", color: "#3b82f6" },
     { value: "interviewing", label: "Interviewing", icon: "\u260E", color: "#eab308" },
     { value: "rejected", label: "Rejected", icon: "\u2717", color: "#ef4444" },
