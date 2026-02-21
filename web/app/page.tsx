@@ -379,23 +379,41 @@ function Dashboard() {
   };
 
   const toggleSave = useCallback(async (jobId: string) => {
-    const current = jobStatuses[jobId] || "";
-    if (current === "") {
-      updateJobStatus(jobId, "saved");
-      toast({ title: "Job saved!", status: "success", duration: 1500, position: "top-right" });
-    } else {
-      updateJobStatus(jobId, "");
-      toast({ title: "Removed from tracked", status: "info", duration: 1500, position: "top-right" });
-    }
+    let action: "save" | "unsave" = "save";
+
+    setJobStatuses((prev) => {
+      const current = prev[jobId] || "";
+      const next = { ...prev };
+
+      if (current === "") {
+        next[jobId] = "saved" as AppStatus;
+        action = "save";
+        toast({ title: "Job saved!", status: "success", duration: 1500, position: "top-right" });
+      } else {
+        delete next[jobId];
+        action = "unsave";
+        toast({ title: "Removed from tracked", status: "info", duration: 1500, position: "top-right" });
+      }
+
+      localStorage.setItem("jobStatuses", JSON.stringify(next));
+
+      // Sync savedIds immediately from the new state
+      const newSavedIds = new Set<string>();
+      Object.entries(next).forEach(([id, s]) => { if (s !== "") newSavedIds.add(id); });
+      setSavedIds(newSavedIds);
+
+      return next;
+    });
+
     // Server-side persist (#4)
     try {
       await fetch("/api/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ job_id: jobId, action: current === "" ? "save" : "unsave" }),
+        body: JSON.stringify({ job_id: jobId, action }),
       });
     } catch { /* silent fallback */ }
-  }, [jobStatuses, toast]);
+  }, [toast]);
 
   const clearFilters = () => {
     setKeyword(""); setSearchInput(""); setRemoteOnly(false); setIndiaOnly(false);
