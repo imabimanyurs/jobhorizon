@@ -177,7 +177,7 @@ function Dashboard() {
   const [indiaOnly, setIndiaOnly] = useState(false);
   const [faangOnly, setFaangOnly] = useState(false);
   const [minScore, setMinScore] = useState(0);
-  const [sources, setSources] = useState<string[]>(["jsearch"]);
+  const [sources, setSources] = useState<string[]>([]);
   const [country, setCountry] = useState("");
   const [minSalary, setMinSalary] = useState(0);
   const [minSalaryPreview, setMinSalaryPreview] = useState(0);
