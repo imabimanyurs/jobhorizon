@@ -484,21 +484,21 @@ function Dashboard() {
             rightIcon={<Text fontSize="10px">▾</Text>}
           >
             <HStack spacing={1.5}>
-              <Text fontSize="xs">{sources.length === 0 ? 'All Sources' : sources.length === 5 ? 'All Sources' : `${sources.length} selected`}</Text>
-              {sources.length > 0 && sources.length < 5 && (
+              <Text fontSize="xs">{sources.length === 0 ? 'All Sources' : sources.length === 7 ? 'All Sources' : `${sources.length} selected`}</Text>
+              {sources.length > 0 && sources.length < 7 && (
                 <Badge bg="#6366f1" color="white" borderRadius="full" fontSize="9px" minW="16px" h="16px" display="flex" alignItems="center" justifyContent="center">{sources.length}</Badge>
               )}
             </HStack>
           </MenuButton>
           <MenuList bg={t.menuBg} border="1px solid" borderColor={t.menuBorder} borderRadius="12px" boxShadow={t.menuShadow} py={2} px={1} minW="180px" zIndex={20}>
-            {["jsearch", "greenhouse", "lever", "adzuna", "serp"].map(src => (
+            {["jsearch", "greenhouse", "lever", "ashby", "remoteok", "adzuna", "serp"].map(src => (
               <MenuItem key={src} bg="transparent" _hover={{ bg: t.sourceRowHover }} borderRadius="8px" px={3} py={1.5}
                 onClick={() => { const next = sources.includes(src) ? sources.filter(s => s !== src) : [...sources, src]; setSources(next); setPage(1); }}
               >
                 <Checkbox size="sm" colorScheme="purple" isChecked={sources.includes(src)} pointerEvents="none" spacing={2}
                   sx={{ '& .chakra-checkbox__control': { borderColor: t.inputBorder, bg: t.inputBg }, '& .chakra-checkbox__control[data-checked]': { bg: '#6366f1', borderColor: '#6366f1' } }}
                 >
-                  <Text fontSize="xs" color={t.textSecondary}>{src === 'serp' ? 'SerpAPI' : src === 'jsearch' ? 'JSearch ⭐' : src.charAt(0).toUpperCase() + src.slice(1)}</Text>
+                  <Text fontSize="xs" color={t.textSecondary}>{src === 'serp' ? 'SerpAPI' : src === 'jsearch' ? 'JSearch ⭐' : src === 'remoteok' ? 'Remote OK 🌍' : src === 'ashby' ? 'Ashby 🏢' : src.charAt(0).toUpperCase() + src.slice(1)}</Text>
                 </Checkbox>
               </MenuItem>
             ))}

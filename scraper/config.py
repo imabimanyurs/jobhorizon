@@ -341,5 +341,63 @@ JSEARCH_QUERIES = [
     {"query": "software development engineer flipkart OR swiggy OR razorpay OR meesho", "country": "in", "label": "Indian Tech: SDE", "date_posted": "month"},
 ]
 
+# ─── Ashby companies (board slugs for api.ashbyhq.com) ────────
+ASHBY_COMPANIES = [
+    # Fintech / Finance
+    "ramp",
+    "brex",
+    "mercury",
+    "deel",
+    "carta",
+    "plaid",
+    "column",
+    "pipe",
+    # Developer Tools / Infra
+    "notion",
+    "figma",
+    "linear",
+    "vercel",
+    "supabase",
+    "railway",
+    "planetscale",
+    "neon",
+    "resend",
+    "dbt-labs",
+    "grafana",
+    "snyk",
+    # AI / ML
+    "anthropic",
+    "cohere",
+    "together-ai",
+    "anyscale",
+    "perplexity",
+    "stability-ai",
+    "adept",
+    "character-ai",
+    "midjourney",
+    "writesonic",
+    # SaaS / Products
+    "loom",
+    "calendly",
+    "airtable",
+    "retool",
+    "miro",
+    "webflow",
+    "drata",
+    "postman",
+    "jasper-ai",
+    # Security / Enterprise
+    "wiz",
+    "lacework",
+    "onepassword",
+    "tailscale",
+    "teleport",
+    # Other notable companies
+    "gusto",
+    "rippling",
+    "lattice",
+    "ashbyhq",
+]
+
 # ─── Exchange rates ───────────────────────────────────────────
 USD_TO_INR = 83.5

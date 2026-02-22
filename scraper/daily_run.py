@@ -104,9 +104,9 @@ def run_all_scrapers():
     stats_before = get_db_stats()
     print(f"[DB] Before: {stats_before['total']} total jobs", flush=True)
 
-    # 1. ATS Scraper (Greenhouse + Lever)
+    # 1. ATS Scraper (Greenhouse + Lever + Adzuna + JSearch + RemoteOK + Ashby)
     print(f"\n{'─'*40}", flush=True)
-    print("[1/4] Running ATS Scraper (Greenhouse + Lever)...", flush=True)
+    print("[1/6] Running ATS Scraper (Greenhouse + Lever + RemoteOK + Ashby + Adzuna + JSearch)...", flush=True)
     try:
         from scraper import run_scraper
         # run_scraper already calls SerpAPI, Adzuna, JSearch internally

@@ -252,6 +252,20 @@ def run_scraper() -> None:
     except Exception as e:
         print(f"[JSEARCH] JSearch scraper error: {e}", flush=True)
 
+    # Remote OK (free, no API key)
+    try:
+        from remoteok_scraper import run_remoteok_scraper
+        run_remoteok_scraper()
+    except Exception as e:
+        print(f"[REMOTEOK] Remote OK scraper error: {e}", flush=True)
+
+    # Ashby (free, no API key)
+    try:
+        from ashby_scraper import run_ashby_scraper
+        run_ashby_scraper()
+    except Exception as e:
+        print(f"[ASHBY] Ashby scraper error: {e}", flush=True)
+
 
 if __name__ == "__main__":
     run_scraper()

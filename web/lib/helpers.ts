@@ -43,6 +43,7 @@ export function getFreshnessBadge(dateStr: string): { label: string; color: stri
 export function getSourceBadge(source: string): string {
     const map: Record<string, string> = {
         greenhouse: "#22c55e", lever: "#a78bfa", adzuna: "#3b82f6", jsearch: "#f97316",
+        remoteok: "#14b8a6", ashby: "#10b981",
         serp: "#ef4444", serp_greenhouse: "#16a34a", serp_lever: "#7c3aed",
         serp_indeed: "#6366f1", serp_linkedin: "#0ea5e9", serp_workable: "#14b8a6",
         serp_adzuna: "#2563eb",
@@ -71,6 +72,8 @@ export function lpaToOriginal(lpa: number, currency: string, rates: Record<strin
 
 export function getSourceConfidence(source: string): { label: string; pct: number; color: string } {
     if (source === "greenhouse" || source === "lever") return { label: "Direct ATS", pct: 100, color: "#22c55e" };
+    if (source === "ashby") return { label: "Direct ATS", pct: 95, color: "#10b981" };
+    if (source === "remoteok") return { label: "Remote Board", pct: 90, color: "#14b8a6" };
     if (source === "adzuna") return { label: "Aggregator", pct: 85, color: "#3b82f6" };
     if (source === "jsearch") return { label: "Multi-board", pct: 80, color: "#f97316" };
     if (source.startsWith("serp_")) return { label: "Search", pct: 90, color: "#a78bfa" };
